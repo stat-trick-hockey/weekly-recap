@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>This Week in Hockey</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --deep: #0a0f1e; --slate: #94a3b8; --accent: #3b82f6;
+    --gold: #d4a847; --red: #c41230; --green: #4ade80;
+  }
+  body {
+    background: var(--deep);
+    width: 1080px; height: 1350px;
+    overflow: hidden;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .card {
+    width: 1080px; height: 1350px;
+    background: var(--deep);
+    position: relative; overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .card::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 90% 35% at 50% -5%, rgba(59,130,246,0.15) 0%, transparent 65%),
+      radial-gradient(ellipse 50% 25% at 90% 105%, rgba(196,18,48,0.08) 0%, transparent 55%);
+    pointer-events: none; z-index: 0;
+  }
+  .grid-bg {
+    position:absolute;inset:0;
+    background-image:linear-gradient(rgba(255,255,255,0.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.018) 1px,transparent 1px);
+    background-size:54px 54px;z-index:0;
+  }
+  .rink-top    { position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,var(--red) 0%,var(--red) 33%,white 33%,white 66%,var(--red) 66%);z-index:10; }
+  .rink-bottom { position:absolute;bottom:0;left:0;right:0;height:5px;background:linear-gradient(90deg,#1a3a6b 0%,#1a3a6b 33%,white 33%,white 66%,#1a3a6b 66%);z-index:10; }
+
+  /* ── Header ── */
+  .header {
+    position:relative;z-index:5;
+    padding: 20px 52px 14px;
+    display:flex; justify-content:space-between; align-items:center;
+    flex-shrink:0;
+  }
+  .eyebrow { font-family:'DM Mono',monospace;font-size:16px;letter-spacing:0.2em;color:var(--accent);text-transform:uppercase;margin-bottom:6px; }
+  .title   { font-family:'Bebas Neue',sans-serif;font-size:104px;line-height:0.95;color:white;letter-spacing:0.02em; }
+  .title span { color:var(--accent); }
+  .header-right { text-align:right; }
+  .week-label { font-family:'DM Mono',monospace;font-size:16px;letter-spacing:0.12em;color:var(--slate);text-transform:uppercase;margin-bottom:6px; }
+  .games-count { font-family:'Bebas Neue',sans-serif;font-size:84px;color:white;line-height:1; }
+  .games-label { font-family:'DM Mono',monospace;font-size:15px;letter-spacing:0.18em;color:var(--slate);text-transform:uppercase; }
+
+  .hdivider { position:relative;z-index:5;margin:0 52px;height:1px;background:linear-gradient(90deg,var(--accent),rgba(59,130,246,0.1));flex-shrink:0; }
+
+  /* ── Storyline ── */
+  .storyline {
+    position:relative;z-index:5;
+    padding:10px 52px;
+    display:flex; gap:16px; align-items:flex-start;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+    flex-shrink:0;
+  }
+  .storyline-icon { font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--gold);line-height:1;flex-shrink:0;margin-top:2px; }
+  .storyline-title { font-family:'Bebas Neue',sans-serif;font-size:38px;color:white;letter-spacing:0.02em;margin-bottom:4px; }
+  .storyline-body  { font-size:17px;color:rgba(255,255,255,0.6);line-height:1.5;font-weight:300; }
+  .storyline-body strong { color:white;font-weight:500; }
+
+  /* ── Numbers row ── */
+  .numbers-row {
+    position:relative;z-index:5;
+    padding:10px 52px;
+    display:flex;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+    flex-shrink:0;
+  }
+  .number-stat { flex:1;text-align:center;padding:0 8px;border-right:1px solid rgba(255,255,255,0.07); }
+  .number-stat:last-child { border-right:none; }
+  .number-value { font-family:'Bebas Neue',sans-serif;font-size:60px;color:white;line-height:1;display:block; }
+  .number-value.accent { color:var(--accent); }
+  .number-value.gold   { color:var(--gold); }
+  .number-value.red    { color:#f87171; }
+  .number-desc { font-family:'DM Mono',monospace;font-size:13px;letter-spacing:0.12em;color:var(--slate);text-transform:uppercase;margin-top:3px;display:block;white-space:pre-line;line-height:1.4; }
+
+  /* ── Section label ── */
+  .section-label {
+    font-family:'DM Mono',monospace;font-size:13px;letter-spacing:0.2em;
+    color:var(--accent);text-transform:uppercase;margin-bottom:8px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .section-label::after { content:'';flex:1;height:1px;background:rgba(59,130,246,0.25); }
+
+  /* ── Games section ── */
+  .games-section {
+    position:relative;z-index:5;
+    padding:12px 52px 14px;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+    flex-shrink:0;
+    overflow:hidden;
+  }
+  .days-grid {
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:0 32px;
+  }
+  .day-block { margin-bottom:8px; }
+  .day-block:last-child { margin-bottom:0; }
+  .day-label {
+    font-family:'DM Mono',monospace;font-size:13px;letter-spacing:0.18em;
+    color:var(--accent);text-transform:uppercase;margin-bottom:5px;
+    padding-bottom:3px;border-bottom:1px solid rgba(59,130,246,0.2);
+  }
+  .result-row   { display:flex;align-items:center;gap:6px;margin-bottom:5px; }
+  .result-row:last-child { margin-bottom:0; }
+  .team-abbr    { font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:0.05em;width:46px;flex-shrink:0; }
+  .team-abbr.winner { color:white; }
+  .team-abbr.loser  { color:rgba(255,255,255,0.35); }
+  .vs-at { font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,0.2); }
+  .score-display { display:flex;align-items:center;gap:4px;font-family:'DM Mono',monospace;font-size:18px; }
+  /* 3-col density */
+  .days-grid[style*="repeat(3"] .team-abbr   { font-size:21px;width:42px; }
+  .days-grid[style*="repeat(3"] .score-display { font-size:17px; }
+  .days-grid[style*="repeat(3"] .day-label   { font-size:11px; }
+  .days-grid[style*="repeat(3"] .badge       { font-size:9px;padding:1px 5px; }
+  /* 4-col density */
+  .days-grid[style*="repeat(4"] .team-abbr   { font-size:18px;width:36px; }
+  .days-grid[style*="repeat(4"] .score-display { font-size:15px; }
+  .days-grid[style*="repeat(4"] .day-label   { font-size:10px;letter-spacing:0.10em; }
+  .days-grid[style*="repeat(4"] .badge       { font-size:8px;padding:1px 4px;letter-spacing:0; }
+  .days-grid[style*="repeat(4"] .result-row  { margin-bottom:3px; }
+  .days-grid[style*="repeat(4"] .vs-at       { font-size:10px; }
+  .score-w    { color:white;font-weight:500; }
+  .score-l    { color:rgba(255,255,255,0.35); }
+  .score-dash { color:rgba(255,255,255,0.2); }
+  .badge { margin-left:auto;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.06em;text-transform:uppercase;padding:2px 6px;border-radius:2px;flex-shrink:0; }
+  .badge-blowout { background:rgba(196,18,48,0.2);color:#f87171;border:1px solid rgba(196,18,48,0.3); }
+  .badge-upset   { background:rgba(212,168,71,0.15);color:var(--gold);border:1px solid rgba(212,168,71,0.3); }
+  .badge-ot      { background:rgba(59,130,246,0.15);color:#93c5fd;border:1px solid rgba(59,130,246,0.3); }
+  .badge-so      { background:rgba(59,130,246,0.1);color:#93c5fd;border:1px solid rgba(59,130,246,0.2); }
+
+  /* ── Awards section ── */
+  .awards-section {
+    position:relative;z-index:5;
+    padding:10px 52px 12px;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+    flex-shrink:0;
+  }
+  .awards-grid {
+    display:grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap:12px 20px;
+  }
+  .award-card {
+    background:rgba(255,255,255,0.03);
+    border:1px solid rgba(255,255,255,0.07);
+    border-radius:6px;
+    padding:12px 14px;
+  }
+  .award-icon-label {
+    display:flex;align-items:center;gap:6px;margin-bottom:6px;
+  }
+  .award-icon  { font-size:16px;line-height:1; }
+  .award-label { font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.16em;color:var(--accent);text-transform:uppercase; }
+  .award-name  { font-family:'Bebas Neue',sans-serif;font-size:34px;color:white;line-height:1;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+  .award-team  { font-size:16px;color:var(--slate); }
+  .award-stat  { font-family:'DM Mono',monospace;font-size:18px;font-weight:500;margin-bottom:2px; }
+  .award-sub   { font-family:'DM Mono',monospace;font-size:13px;color:rgba(255,255,255,0.4);text-transform:uppercase; }
+
+  /* ── Info row (injuries + standings side by side) ── */
+  .info-row {
+    position:relative;z-index:5;
+    padding:10px 52px 14px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+    flex-shrink:0;
+  }
+  .info-card {
+    background:rgba(255,255,255,0.03);
+    border:1px solid rgba(255,255,255,0.07);
+    border-radius:6px;
+    padding:12px 14px;
+  }
+  .info-primary { font-family:'Bebas Neue',sans-serif;font-size:48px;line-height:1;margin-bottom:2px; }
+  .info-desc    { font-family:'DM Mono',monospace;font-size:13px;color:rgba(255,255,255,0.5);letter-spacing:0.08em;margin-bottom:6px; }
+  .info-lines   { display:flex;flex-direction:column;gap:3px; }
+  .info-line    { font-family:'DM Mono',monospace;font-size:13px;color:rgba(255,255,255,0.65);letter-spacing:0.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+
+  /* ── TOTW banner ── */
+  .totw-banner {
+    position:relative;z-index:5;
+    padding:10px 52px;
+    display:flex;align-items:center;gap:24px;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+    flex-shrink:0;
+    background:rgba(59,130,246,0.04);
+  }
+  .totw-label-col { flex-shrink:0; }
+  .totw-name  { font-family:'Bebas Neue',sans-serif;font-size:72px;color:white;line-height:1; }
+  .totw-name span { color:var(--accent); }
+  .totw-record { font-family:'DM Mono',monospace;font-size:15px;color:var(--slate);letter-spacing:0.12em;text-transform:uppercase;margin-top:4px; }
+  .totw-sub    { font-size:15px;color:rgba(255,255,255,0.35);font-weight:300; }
+
+  /* ── Right rail in TOTW row ── */
+  .right-rail {
+    margin-left:auto;
+    display:flex;flex-direction:row;align-items:flex-start;
+    border-left:1px solid rgba(255,255,255,0.08);
+    padding-left:24px;
+    gap:0;
+    min-width:0;
+  }
+
+  /* ── Standings sidebar in TOTW row ── */
+  .standings-sidebar {
+    display:flex;flex-direction:column;justify-content:flex-start;
+    width:190px;flex-shrink:0;
+  }
+  .standings-sidebar .award-icon-label { margin-bottom:4px; }
+  .standings-sidebar .info-primary { font-size:32px; }
+  .standings-sidebar .info-desc    { font-size:11px;margin-bottom:4px; }
+  .standings-sidebar .info-line    { font-size:11px; }
+  .standings-sidebar .info-card    { background:none;border:none;padding:0; }
+
+  /* ── Mini stat rows (game breakdown tile) ── */
+  .stat-row-mini {
+    display:flex;align-items:center;gap:8px;
+    margin-bottom:5px;
+  }
+  .stat-row-mini:last-child { margin-bottom:0; }
+  .srl { font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--slate);width:52px;flex-shrink:0; }
+  .srv { font-family:'Bebas Neue',sans-serif;font-size:22px;line-height:1;width:48px;flex-shrink:0; }
+  .src { font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:0.04em; }
+
+  /* ── Footer ── */
+  .footer {
+    position:relative;z-index:5;
+    margin-top:auto;
+    padding:10px 52px;
+    display:flex;justify-content:space-between;align-items:center;
+    flex-shrink:0;
+    border-top:1px solid rgba(255,255,255,0.05);
+  }
+  .footer-brand { font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:0.1em;color:rgba(255,255,255,0.2); }
+  .footer-brand span { color:var(--accent); }
+  .footer-tag   { font-family:'DM Mono',monospace;font-size:13px;letter-spacing:0.1em;color:rgba(255,255,255,0.12); }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="rink-top"></div>
+  <div class="rink-bottom"></div>
+  <div class="grid-bg"></div>
+
+  <!-- ── Header ── -->
+  <div class="header">
+    <div>
+      <div class="eyebrow">NHL · Weekly Recap</div>
+      <div class="title">THIS WEEK <span>IN</span> HOCKEY</div>
+    </div>
+    <div class="header-right">
+      <div class="week-label">{{WEEK_LABEL}}</div>
+      <div class="games-count">{{TOTAL_GAMES}}</div>
+      <div class="games-label">Games</div>
+    </div>
+  </div>
+
+  <div class="hdivider"></div>
+
+  <!-- ── Storyline ── -->
+  <div class="storyline">
+    <div class="storyline-icon">★</div>
+    <div>
+      <div class="storyline-title">{{HEADLINE_TITLE}}</div>
+      <div class="storyline-body">{{HEADLINE_BODY}}</div>
+    </div>
+  </div>
+
+  <!-- ── Numbers ── -->
+  <div class="numbers-row">{{NUMBERS_HTML}}</div>
+
+  <!-- ── Team of the Week + Standings Movers ── -->
+  <div class="totw-banner">
+    <div class="totw-label-col">
+      <div class="section-label" style="margin-bottom:4px;">Team of the Week</div>
+      <div class="totw-name">{{TOTW_NAME_LINE1}} <span>{{TOTW_NAME_LINE2}}</span></div>
+      <div class="totw-record">{{TOTW_RECORD}} · +{{TOTW_GD}} GD · {{TOTW_GF}} GF</div>
+    </div>
+    <div class="right-rail">
+      <div class="standings-sidebar" style="padding-right:20px;">
+        {{TRADE_PANEL}}
+      </div>
+      <div class="standings-sidebar" style="border-left:1px solid rgba(255,255,255,0.08);padding-left:20px;">
+        {{GAME_STATS_PANEL}}
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Awards ── -->
+  <div class="awards-section">
+    <div class="section-label">Players of the Week</div>
+    <div class="awards-grid">
+      {{SKATER_PANEL}}
+      {{GOALIE_PANEL}}
+      {{GOON_PANEL}}
+    </div>
+  </div>
+
+  <!-- ── Game Results ── -->
+  <div class="games-section">
+    <div class="section-label">Results</div>
+    {{RESULTS_SECTIONS_HTML}}
+  </div>
+
+  <!-- ── Footer ── -->
+  <div class="footer">
+    <div class="footer-brand"><span>STAT</span>TRICK · HOCKEY</div>
+    <div class="footer-tag">@stattrick_hockey · Data via NHL API</div>
+  </div>
+</div>
+</body>
+</html>
