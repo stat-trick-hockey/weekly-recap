@@ -49,6 +49,8 @@ export function buildCardHTML({ games, story, injuries, standingsMover, top10, s
   // Info cards (injuries + standings)
   const riser  = standingsMover?.biggestRiser;
   const faller = standingsMover?.biggestFaller;
+  const riserLabel  = riser  ? (riser.abbrs  ?? [riser.abbr]).join(' / ')  : '—';
+  const fallerLabel = faller ? (faller.abbrs ?? [faller.abbr]).join(' / ') : '—';
 
   const injuryHTML = buildInfoCard({
     icon: '🩹', label: 'Injury Report (League)',
@@ -64,12 +66,12 @@ export function buildCardHTML({ games, story, injuries, standingsMover, top10, s
 
   const standingsHTML = buildInfoCard({
     icon: '📈', label: 'Standings Movers',
-    primary: riser ? `${riser.abbr} ▲` : '—',
+    primary: riser ? `${riserLabel} ▲` : '—',
     primaryColor: 'var(--green)',
     desc: riser ? `+${riser.pointsGained} pts · biggest climber` : 'No data',
     lines: [
-      riser  ? `▲ ${riser.abbr}  +${riser.pointsGained} pts this week` : '',
-      faller ? `▼ ${faller.abbr}  ${faller.pointsLost >= 0 ? '+' : ''}${faller.pointsLost} pts this week` : '',
+      riser  ? `▲ ${riserLabel}  +${riser.pointsGained} pts this week` : '',
+      faller ? `▼ ${fallerLabel}  ${faller.pointsLost >= 0 ? '+' : ''}${faller.pointsLost} pts this week` : '',
     ].filter(Boolean),
   });
 
