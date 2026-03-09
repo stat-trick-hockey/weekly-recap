@@ -4,152 +4,249 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Stat Trick Hockey — Weekly Recap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: #0a0f1e;
-    color: white;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    min-height: 100vh;
+  :root {
+    --bg:    #07090f;
+    --bg2:   #0d1120;
+    --border:rgba(255,255,255,0.07);
+    --accent:#3b82f6;
+    --gold:  #d4a847;
+    --slate: #64748b;
+    --text:  #e2e8f0;
+    --muted: #475569;
   }
-  header {
-    padding: 24px 32px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .brand { font-size: 20px; font-weight: 700; letter-spacing: 0.05em; }
-  .brand span { color: #3b82f6; }
-  .subtitle { font-size: 12px; color: #64748b; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 2px; }
-  nav { display: flex; gap: 8px; }
-  nav button {
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.1);
-    color: white;
-    padding: 8px 18px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 13px;
-    transition: background 0.15s;
-  }
-  nav button:hover { background: rgba(255,255,255,0.12); }
-  nav button.active { background: #3b82f6; border-color: #3b82f6; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; overflow-x:hidden; }
 
-  .card-viewer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 32px 16px;
-    gap: 16px;
+  /* topbar */
+  .topbar {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0 48px; height:64px;
+    border-bottom:1px solid var(--border);
+    background:rgba(7,9,15,0.96); backdrop-filter:blur(12px);
+    position:sticky; top:0; z-index:100;
   }
+  .brand { font-family:'Bebas Neue',sans-serif; font-size:26px; letter-spacing:0.12em; color:white; }
+  .brand em { color:var(--accent); font-style:normal; }
+  .brand-dot { display:inline-block; width:5px; height:5px; background:var(--accent); border-radius:50%; margin:0 10px 3px; vertical-align:middle; }
+  .topbar-right { font-family:'DM Mono',monospace; font-size:11px; color:var(--muted); letter-spacing:0.1em; text-transform:uppercase; }
+
+  /* hero */
+  .hero {
+    padding:72px 48px 56px;
+    border-bottom:1px solid var(--border);
+    position:relative; overflow:hidden;
+  }
+  .hero::before {
+    content:'RECAP';
+    position:absolute; right:-10px; top:-20px;
+    font-family:'Bebas Neue',sans-serif; font-size:280px;
+    color:rgba(255,255,255,0.016); pointer-events:none; user-select:none; line-height:1;
+  }
+  .hero-eyebrow { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:0.18em; color:var(--accent); text-transform:uppercase; margin-bottom:18px; }
+  .hero-title { font-family:'Bebas Neue',sans-serif; font-size:clamp(72px,9vw,120px); line-height:0.9; color:white; letter-spacing:0.02em; }
+  .hero-title span { color:var(--accent); }
+  .hero-sub { margin-top:22px; font-size:16px; color:var(--slate); font-weight:300; max-width:500px; line-height:1.65; }
+
+  /* week nav */
+  .week-nav {
+    padding:0 48px;
+    border-bottom:1px solid var(--border);
+    display:flex; align-items:center; gap:0;
+    overflow-x:auto; scrollbar-width:none;
+    background:var(--bg2);
+  }
+  .week-nav::-webkit-scrollbar { display:none; }
+  .week-btn {
+    flex-shrink:0; background:none; border:none; color:var(--muted);
+    padding:20px 24px; cursor:pointer;
+    font-family:'DM Mono',monospace; font-size:12px; letter-spacing:0.08em; text-transform:uppercase;
+    border-bottom:2px solid transparent;
+    transition:color 0.15s, border-color 0.15s;
+    white-space:nowrap; position:relative; top:1px;
+  }
+  .week-btn:hover { color:var(--text); }
+  .week-btn.active { color:white; border-bottom-color:var(--accent); }
+  .week-btn .wdate { font-size:10px; color:var(--muted); display:block; margin-top:3px; }
+  .week-btn.active .wdate { color:rgba(59,130,246,0.7); }
+
+  /* sections */
+  .cards-section { display:none; }
+  .cards-section.active { display:block; }
+
+  .content { max-width:1400px; margin:0 auto; padding:56px 48px; }
+
+  .section-header { display:flex; align-items:baseline; gap:16px; margin-bottom:40px; }
+  .section-title { font-family:'Bebas Neue',sans-serif; font-size:40px; letter-spacing:0.06em; color:white; }
+  .section-meta { font-family:'DM Mono',monospace; font-size:11px; color:var(--muted); letter-spacing:0.1em; text-transform:uppercase; }
+
+  /* card grid */
+  .cards-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(500px, 1fr)); gap:40px; align-items:start; }
+
+  .card-wrap { position:relative; animation:fadeUp 0.45s ease both; }
+  .card-wrap:nth-child(2) { animation-delay:0.1s; }
+  .card-wrap:nth-child(3) { animation-delay:0.2s; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+
+  .card-label {
+    font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.14em; text-transform:uppercase;
+    color:var(--muted); margin-bottom:14px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .card-label::before { content:''; display:inline-block; width:24px; height:1px; background:var(--muted); }
+
   .card-img {
-    max-width: 540px;
-    width: 100%;
-    border-radius: 12px;
-    box-shadow: 0 24px 80px rgba(0,0,0,0.6);
-    display: none;
+    width:100%; border-radius:12px;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.06), 0 40px 100px rgba(0,0,0,0.75), 0 8px 28px rgba(0,0,0,0.4);
+    display:block;
+    transition:transform 0.35s ease, box-shadow 0.35s ease;
   }
-  .card-img.active { display: block; }
-
-  .no-card {
-    text-align: center;
-    padding: 80px 20px;
-    color: #475569;
+  .card-img:hover {
+    transform:translateY(-6px) scale(1.008);
+    box-shadow: 0 0 0 1px rgba(59,130,246,0.25), 0 48px 120px rgba(0,0,0,0.85), 0 16px 40px rgba(59,130,246,0.12);
   }
-  .no-card h2 { font-size: 24px; margin-bottom: 8px; }
-  .no-card p  { font-size: 14px; }
 
-  footer {
-    text-align: center;
-    padding: 24px;
-    color: #334155;
-    font-size: 12px;
-    letter-spacing: 0.08em;
+  /* empty / loading */
+  .empty { padding:140px 0; text-align:center; }
+  .empty-icon { font-size:52px; margin-bottom:28px; opacity:0.35; }
+  .empty h2 { font-family:'Bebas Neue',sans-serif; font-size:48px; letter-spacing:0.06em; color:var(--muted); margin-bottom:12px; }
+  .empty p { font-size:16px; color:var(--muted); font-weight:300; }
+
+  .loading { display:flex; align-items:center; gap:14px; padding:100px 48px; color:var(--muted); font-family:'DM Mono',monospace; font-size:12px; letter-spacing:0.1em; text-transform:uppercase; }
+  .spinner { width:18px; height:18px; border:2px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin 0.7s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  /* footer */
+  footer { border-top:1px solid var(--border); padding:36px 48px; display:flex; justify-content:space-between; align-items:center; }
+  .footer-brand { font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:0.1em; color:var(--muted); }
+  .footer-brand em { color:var(--accent); font-style:normal; }
+  .footer-meta { font-family:'DM Mono',monospace; font-size:11px; color:var(--muted); letter-spacing:0.08em; }
+
+  @media (max-width:768px) {
+    .topbar, .hero, .content, footer { padding-left:24px; padding-right:24px; }
+    .week-nav { padding:0 24px; }
+    .hero::before { display:none; }
+    .cards-grid { grid-template-columns:1fr; gap:28px; }
+    .hero-title { font-size:72px; }
   }
 </style>
 </head>
 <body>
 
-<header>
-  <div>
-    <div class="brand"><span>STAT</span>TRICK HOCKEY</div>
-    <div class="subtitle">Weekly Recap Cards</div>
-  </div>
-  <nav id="nav"></nav>
-</header>
+<div class="topbar">
+  <div class="brand"><em>STAT</em><span class="brand-dot"></span>TRICK HOCKEY</div>
+  <div class="topbar-right">Weekly Recap Archive</div>
+</div>
 
-<div class="card-viewer" id="viewer">
-  <div class="no-card" id="no-card">
-    <h2>No cards yet</h2>
-    <p>Cards are generated every Monday morning.</p>
+<div class="hero">
+  <div class="hero-eyebrow">NHL · Weekly Recap</div>
+  <div class="hero-title">THIS WEEK<br><span>IN HOCKEY</span></div>
+  <div class="hero-sub">Auto-generated every Monday. Full week in review — results, awards, injuries, and standings movement.</div>
+</div>
+
+<div class="week-nav" id="nav"></div>
+
+<div id="main-content">
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    Loading cards&hellip;
   </div>
 </div>
 
-<footer>@stattrick_hockey · Data via NHL API &amp; ESPN</footer>
+<footer>
+  <div class="footer-brand"><em>STAT</em>TRICK HOCKEY</div>
+  <div class="footer-meta">@stattrick_hockey &nbsp;·&nbsp; Data via NHL API &amp; ESPN</div>
+</footer>
 
 <script>
-  // Cards are committed to output/ by GitHub Actions each Monday.
-  // We discover them via the GitHub API — no token needed for public repos.
-  const OWNER = 'stat-trick-hockey';
-  const REPO  = 'weekly-recap';
+  const OWNER  = 'stat-trick-hockey';
+  const REPO   = 'weekly-recap';
   const BRANCH = 'main';
 
-  async function loadCards() {
-    try {
-      const res = await fetch(
-        `https://api.github.com/repos/${OWNER}/${REPO}/contents/output?ref=${BRANCH}`
-      );
-      const files = await res.json();
-      const pngs = files
-        .filter(f => f.name.endsWith('.png'))
-        .sort((a, b) => b.name.localeCompare(a.name)); // newest first
-
-      if (!pngs.length) return;
-
-      document.getElementById('no-card').style.display = 'none';
-
-      const nav     = document.getElementById('nav');
-      const viewer  = document.getElementById('viewer');
-
-      // Group by date prefix
-      const dates = [...new Set(pngs.map(f => f.name.slice(0, 10)))];
-
-      dates.forEach((date, di) => {
-        const group = pngs.filter(f => f.name.startsWith(date));
-
-        // Nav button per date
-        const btn = document.createElement('button');
-        btn.textContent = formatDate(date);
-        btn.className = di === 0 ? 'active' : '';
-        btn.dataset.date = date;
-        btn.onclick = () => {
-          document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          document.querySelectorAll('.card-img').forEach(img => {
-            img.classList.toggle('active', img.dataset.date === date);
-          });
-        };
-        nav.appendChild(btn);
-
-        // One img per card in the group
-        group.forEach(file => {
-          const img = document.createElement('img');
-          img.src = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/output/${file.name}`;
-          img.alt = file.name;
-          img.className = 'card-img' + (di === 0 ? ' active' : '');
-          img.dataset.date = date;
-          viewer.appendChild(img);
-        });
-      });
-    } catch (e) {
-      console.error('Failed to load cards:', e);
-    }
+  function formatWeekLabel(d) {
+    const dt = new Date(d + 'T12:00:00Z');
+    return dt.toLocaleDateString('en-US', { month:'short', day:'numeric', timeZone:'UTC' });
+  }
+  function cardTypeLabel(name) {
+    return name.includes('injury-report') ? 'Injury Report' : 'Weekly Recap';
   }
 
-  function formatDate(d) {
-    const dt = new Date(d + 'T12:00:00Z');
-    return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+  function buildSection(date, group, isActive) {
+    const section = document.createElement('div');
+    section.className = 'cards-section' + (isActive ? ' active' : '');
+    section.dataset.date = date;
+
+    const content = document.createElement('div');
+    content.className = 'content';
+
+    const header = document.createElement('div');
+    header.className = 'section-header';
+    header.innerHTML = `<div class="section-title">Week of ${formatWeekLabel(date)}</div><div class="section-meta">${group.length} card${group.length > 1 ? 's' : ''}</div>`;
+
+    const grid = document.createElement('div');
+    grid.className = 'cards-grid';
+
+    group.forEach(file => {
+      const wrap  = document.createElement('div');
+      wrap.className = 'card-wrap';
+      const label = document.createElement('div');
+      label.className = 'card-label';
+      label.textContent = cardTypeLabel(file.name);
+      const img = document.createElement('img');
+      img.src = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/output/${file.name}`;
+      img.alt = file.name;
+      img.className = 'card-img';
+      img.loading = 'lazy';
+      wrap.appendChild(label);
+      wrap.appendChild(img);
+      grid.appendChild(wrap);
+    });
+
+    content.appendChild(header);
+    content.appendChild(grid);
+    section.appendChild(content);
+    return section;
+  }
+
+  async function loadCards() {
+    const main = document.getElementById('main-content');
+    const nav  = document.getElementById('nav');
+    try {
+      const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/output?ref=${BRANCH}`);
+      const files = await res.json();
+      const pngs = files.filter(f => f.name.endsWith('.png')).sort((a,b) => b.name.localeCompare(a.name));
+
+      document.getElementById('loading').remove();
+
+      if (!pngs.length) {
+        main.innerHTML = `<div class="content"><div class="empty"><div class="empty-icon">🏒</div><h2>No cards yet</h2><p>Cards are generated every Monday morning.</p></div></div>`;
+        return;
+      }
+
+      const dates = [...new Set(pngs.map(f => f.name.slice(0,10)))];
+      dates.forEach((date, di) => {
+        const group = pngs.filter(f => f.name.startsWith(date));
+        const isActive = di === 0;
+
+        const btn = document.createElement('button');
+        btn.className = 'week-btn' + (isActive ? ' active' : '');
+        btn.dataset.date = date;
+        btn.innerHTML = `${formatWeekLabel(date)}<span class="wdate">${date}</span>`;
+        btn.onclick = () => {
+          document.querySelectorAll('.week-btn').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.cards-section').forEach(s => s.classList.remove('active'));
+          btn.classList.add('active');
+          document.querySelector(`.cards-section[data-date="${date}"]`).classList.add('active');
+        };
+        nav.appendChild(btn);
+        main.appendChild(buildSection(date, group, isActive));
+      });
+    } catch(e) {
+      document.getElementById('loading').remove();
+      main.innerHTML = `<div class="content"><div class="empty"><div class="empty-icon">⚠️</div><h2>Failed to load</h2><p>Could not fetch cards from GitHub.</p></div></div>`;
+    }
   }
 
   loadCards();
