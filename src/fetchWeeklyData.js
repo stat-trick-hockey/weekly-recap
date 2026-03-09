@@ -321,6 +321,9 @@ export async function fetchStandingsMover(startDate, endDate) {
     // Sort by diff - top is riser, bottom is faller
     diffs.sort((a, b) => b.diff - a.diff);
 
+    console.log(`Standings diffs (top 5): ${diffs.slice(0,5).map(d => `${d.abbr}:${d.diff}`).join(', ')}`);
+    console.log(`Standings diffs (bot 5): ${diffs.slice(-5).map(d => `${d.abbr}:${d.diff}`).join(', ')}`);
+
     const topDiff    = diffs[0]?.diff;
     const bottomDiff = diffs[diffs.length - 1]?.diff;
 
