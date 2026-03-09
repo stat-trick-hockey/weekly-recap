@@ -321,11 +321,15 @@ export async function fetchStandingsMover(startDate, endDate) {
     // Sort by diff - top is riser, bottom is faller
     diffs.sort((a, b) => b.diff - a.diff);
 
-    const riserData  = diffs[0];
-    const fallerData = diffs[diffs.length - 1];
+    const topDiff    = diffs[0]?.diff;
+    const bottomDiff = diffs[diffs.length - 1]?.diff;
 
-    const biggestRiser  = riserData  ? { ...riserData,  pointsGained: riserData.diff } : null;
-    const biggestFaller = fallerData ? { ...fallerData, pointsLost: fallerData.diff } : null;
+    // Collect all teams tied at the top/bottom
+    const riserGroup  = diffs.filter(d => d.diff === topDiff);
+    const fallerGroup = diffs.filter(d => d.diff === bottomDiff);
+
+    const biggestRiser  = riserGroup.length  ? { abbrs: riserGroup.map(d => d.abbr),  pointsGained: topDiff,    abbr: riserGroup[0].abbr }  : null;
+    const biggestFaller = fallerGroup.length ? { abbrs: fallerGroup.map(d => d.abbr), pointsLost:   bottomDiff, abbr: fallerGroup[0].abbr } : null;
 
     return { biggestRiser, biggestFaller };
   } catch (err) {
