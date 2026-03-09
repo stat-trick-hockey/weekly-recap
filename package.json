@@ -1,0 +1,13 @@
+{
+  "name": "nhl-weekly-recap",
+  "version": "1.0.0",
+  "description": "Auto-generates a This Week in Hockey Instagram card every Monday",
+  "type": "module",
+  "scripts": {
+    "generate": "node src/index.js",
+    "generate:week": "node src/index.js --week"
+  },
+  "dependencies": {
+    "puppeteer": "^22.0.0"
+  }
+}

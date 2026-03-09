@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stat Trick Hockey — Weekly Recap</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0a0f1e;
+    color: white;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+  }
+  header {
+    padding: 24px 32px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .brand { font-size: 20px; font-weight: 700; letter-spacing: 0.05em; }
+  .brand span { color: #3b82f6; }
+  .subtitle { font-size: 12px; color: #64748b; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 2px; }
+  nav { display: flex; gap: 8px; }
+  nav button {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: white;
+    padding: 8px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background 0.15s;
+  }
+  nav button:hover { background: rgba(255,255,255,0.12); }
+  nav button.active { background: #3b82f6; border-color: #3b82f6; }
+
+  .card-viewer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 16px;
+    gap: 16px;
+  }
+  .card-img {
+    max-width: 540px;
+    width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+    display: none;
+  }
+  .card-img.active { display: block; }
+
+  .no-card {
+    text-align: center;
+    padding: 80px 20px;
+    color: #475569;
+  }
+  .no-card h2 { font-size: 24px; margin-bottom: 8px; }
+  .no-card p  { font-size: 14px; }
+
+  footer {
+    text-align: center;
+    padding: 24px;
+    color: #334155;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="brand"><span>STAT</span>TRICK HOCKEY</div>
+    <div class="subtitle">Weekly Recap Cards</div>
+  </div>
+  <nav id="nav"></nav>
+</header>
+
+<div class="card-viewer" id="viewer">
+  <div class="no-card" id="no-card">
+    <h2>No cards yet</h2>
+    <p>Cards are generated every Monday morning.</p>
+  </div>
+</div>
+
+<footer>@stattrick_hockey · Data via NHL API &amp; ESPN</footer>
+
+<script>
+  // Cards are committed to output/ by GitHub Actions each Monday.
+  // We discover them via the GitHub API — no token needed for public repos.
+  const OWNER = 'stat-trick-hockey';
+  const REPO  = 'weekly-recap';
+  const BRANCH = 'main';
+
+  async function loadCards() {
+    try {
+      const res = await fetch(
+        `https://api.github.com/repos/${OWNER}/${REPO}/contents/output?ref=${BRANCH}`
+      );
+      const files = await res.json();
+      const pngs = files
+        .filter(f => f.name.endsWith('.png'))
+        .sort((a, b) => b.name.localeCompare(a.name)); // newest first
+
+      if (!pngs.length) return;
+
+      document.getElementById('no-card').style.display = 'none';
+
+      const nav     = document.getElementById('nav');
+      const viewer  = document.getElementById('viewer');
+
+      // Group by date prefix
+      const dates = [...new Set(pngs.map(f => f.name.slice(0, 10)))];
+
+      dates.forEach((date, di) => {
+        const group = pngs.filter(f => f.name.startsWith(date));
+
+        // Nav button per date
+        const btn = document.createElement('button');
+        btn.textContent = formatDate(date);
+        btn.className = di === 0 ? 'active' : '';
+        btn.dataset.date = date;
+        btn.onclick = () => {
+          document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          document.querySelectorAll('.card-img').forEach(img => {
+            img.classList.toggle('active', img.dataset.date === date);
+          });
+        };
+        nav.appendChild(btn);
+
+        // One img per card in the group
+        group.forEach(file => {
+          const img = document.createElement('img');
+          img.src = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/output/${file.name}`;
+          img.alt = file.name;
+          img.className = 'card-img' + (di === 0 ? ' active' : '');
+          img.dataset.date = date;
+          viewer.appendChild(img);
+        });
+      });
+    } catch (e) {
+      console.error('Failed to load cards:', e);
+    }
+  }
+
+  function formatDate(d) {
+    const dt = new Date(d + 'T12:00:00Z');
+    return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+  }
+
+  loadCards();
+</script>
+</body>
+</html>
